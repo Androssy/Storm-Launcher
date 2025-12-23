@@ -126,7 +126,7 @@ local J = { "Superhuman", "Death Step", "Sharkman Karate", "Electric Claw", "Dra
 local K = function()
     local L = 0
     for _, M in ipairs(J) do
-        if w(M, true) then
+        if w(M, false) then
             L += 1
         end
     end

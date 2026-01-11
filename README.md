@@ -6,14 +6,11 @@ The API runs on `http://localhost:3030`
 
 ## Setting a Description
 
-Want to add a note to an account? Maybe show what zone they're in or what task they're doing? Use this.
-
-**How to use:**
+Want to add a note to an account? Show what zone they're in or what task they're doing.
 
 ```lua
 local HttpService = game:GetService("HttpService")
 
--- Set description for current account
 request({
     Url = "http://localhost:3030/api/accounts/description",
     Method = "PUT",
@@ -25,24 +22,17 @@ request({
 })
 ```
 
-You can identify the account by:
-- `username` - the player's display name
-- `account_id` - the account number (starts from 0)
-
-The description shows up in the Storm Launcher UI next to the account.
+The description shows up next to the account in the UI.
 
 ---
 
-## Marking an Account as Finished
+## Marking as Finished
 
-Done with an account? This marks it as finished and closes the Roblox window.
-
-**How to use:**
+Done with an account? This closes Roblox and marks it finished.
 
 ```lua
 local HttpService = game:GetService("HttpService")
 
--- Mark account as finished
 request({
     Url = "http://localhost:3030/api/accounts/finish",
     Method = "POST",
@@ -53,20 +43,46 @@ request({
 })
 ```
 
-You can identify the account by:
-- `username` - the player's display name
-- `account_id` - the account number
-- `pid` - the process ID (optional, auto-detected)
-
-This will:
-1. Kill the Roblox process
-2. Mark the account as "Finished" in the UI
-3. Remove it from the active pool
+The account won't run again until you manually requeue it.
 
 ---
 
-## Tips
+## Putting on Cooldown
 
-- Use `username` when you know the player name (most common)
-- Use `account_id` when working with account indexes
-- Descriptions are great for debugging - you can see what each account is doing at a glance
+Need a break but want to run again later? Use cooldown. The account closes, waits, then auto-joins back.
+
+```lua
+local HttpService = game:GetService("HttpService")
+
+request({
+    Url = "http://localhost:3030/api/accounts/cooldown",
+    Method = "POST",
+    Headers = { ["Content-Type"] = "application/json" },
+    Body = HttpService:JSONEncode({
+        username = "YourUsername",
+        duration = 300  -- seconds (300 = 5 minutes)
+    })
+})
+```
+
+**What happens:**
+1. Roblox closes
+2. Account waits for the timer
+3. When time's up, it goes to the front of the queue
+4. Launches again automatically
+
+Great for rate limits, daily resets, or giving accounts a break.
+
+---
+
+## Quick Reference
+
+| What you want       | Endpoint                    | Key field               |
+| ------------------- | --------------------------- | ----------------------- |
+| Add a note          | `/api/accounts/description` | `description`           |
+| Stop for good       | `/api/accounts/finish`      | `username`              |
+| Stop + auto-restart | `/api/accounts/cooldown`    | `username` + `duration` |
+
+**Identify accounts by:**
+- `username` - player's display name (easiest)
+- `account_id` - account number starting from 0
